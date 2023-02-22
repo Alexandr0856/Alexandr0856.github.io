@@ -10,7 +10,7 @@ API_ID = int(os.getenv('API_ID'))
 API_HASH = os.getenv('API_HASH')
 BOT_TOKEN = os.getenv('BOT_TOKEN')
 
-Bot = Client("StellarBot", api_id=API_ID, api_hash=API_HASH, bot_token=BOT_TOKEN)
+Bot = Client("TestWebApp", api_id=API_ID, api_hash=API_HASH, bot_token=BOT_TOKEN)
 
 web_app = WebAppInfo(url="https://alexandr0856.github.io/")
 
