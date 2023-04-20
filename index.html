@@ -4,9 +4,17 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="author" content="IzzyScan">
+  <meta name="author" content="ZXing for JS">
 
-  <title>IzzyLabs | IzzyNFTs | IzzyScan</title>
+  <title>ZXing TypeScript | Decoding from camera stream</title>
+
+  <style>
+    .center {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+  </style>
 
   <link rel="stylesheet" rel="preload" as="style" onload="this.rel='stylesheet';this.onload=null" href="https://fonts.googleapis.com/css?family=Roboto:300,300italic,700,700italic">
   <link rel="stylesheet" rel="preload" as="style" onload="this.rel='stylesheet';this.onload=null" href="https://unpkg.com/normalize.css@8.0.0/normalize.css">
@@ -15,18 +23,17 @@
 
 <body>
 
-  <main class="wrapper" style="padding-top:2em">
+  <main class="wrapper" style="padding-top:20px; width: 100%">
 
-    <section class="container" id="demo-content">
-      <h2 class="title">Scan QR Code from WebApp</h2>
-
-      <div>
-        <video id="video" width="300" height="200" style="border: 1px solid gray"></video>
+    <section class="container" id="demo-content" style="padding: 20px;">
+      <h2 class="title">IzzySCAN</h2>
+      <label>Result:<code id="result"></code></label>
+      <div style="width: 90%; margin:20px auto;">
+        <video id="video"  style="border: 1px solid gray;  width: 100%; height: 50%"></video>
       </div>
 
-      <div>
-        <a class="button" id="startButton">Start</a>
-        <a class="button" id="resetButton">Reset</a>
+      <div style="width: 100%">
+        <a class="button center" id="approveButton">Approve</a>
       </div>
 
       <div id="sourceSelectPanel" style="display:none">
@@ -34,39 +41,37 @@
         <select id="sourceSelect" style="max-width:400px">
         </select>
       </div>
-
-      <div style="display: table">
-        <label for="decoding-style"> Decoding Style:</label>
-        <select id="decoding-style" size="1">
-          <option value="once">Decode once</option>
-          <option value="continuously">Decode continuously</option>
-        </select>
-      </div>
-
-      <label>Result:</label>
-      <pre><code id="result"></code></pre>
-
     </section>
 
   </main>
 
   <script type="text/javascript" src="https://unpkg.com/@zxing/library@latest"></script>
   <script type="text/javascript">
-    function decodeOnce(codeReader, selectedDeviceId) {
-      codeReader.decodeFromInputVideoDevice(selectedDeviceId, 'video').then((result) => {
-        console.log(result)
-        document.getElementById('result').textContent = result.text
-      }).catch((err) => {
-        console.error(err)
-        document.getElementById('result').textContent = err
-      })
+
+    let nftMarked = false;
+
+    document.getElementById("approveButton").onclick = function() {
+      nftMarked = true;
+      document.getElementById('result').textContent = "NFT marked"
+      document.getElementById('result').style="background-color: rgba(0,255,0,1); color: black"
+      setTimeout(()=> {
+        document.getElementById('result').textContent = ""
+        document.getElementById('result').style="background-color: #f4f5f6; opacity: 1;"
+      }, 3000)
+
     }
 
     function decodeContinuously(codeReader, selectedDeviceId) {
       codeReader.decodeFromInputVideoDeviceContinuously(selectedDeviceId, 'video', (result, err) => {
         if (result) {
           console.log('Found QR code!', result)
-          document.getElementById('result').textContent = result.text
+          if (nftMarked) {
+            document.getElementById('result').textContent = "NFT marked"
+            document.getElementById('result').style="background-color: rgba(0,255,0,1); color: black"
+          } else {
+            document.getElementById('result').textContent = "NFT verified"
+            document.getElementById('result').style="background-color: rgba(0,255,0,0.2); color: black"
+          }
         }
 
         if (err) {
@@ -110,25 +115,8 @@
             const sourceSelectPanel = document.getElementById('sourceSelectPanel')
             sourceSelectPanel.style.display = 'block'
           }
+          decodeContinuously(codeReader, selectedDeviceId);
 
-          document.getElementById('startButton').addEventListener('click', () => {
-
-            const decodingStyle = document.getElementById('decoding-style').value;
-
-            if (decodingStyle == "once") {
-              decodeOnce(codeReader, selectedDeviceId);
-            } else {
-              decodeContinuously(codeReader, selectedDeviceId);
-            }
-
-            console.log(`Started decode from camera with id ${selectedDeviceId}`)
-          })
-
-          document.getElementById('resetButton').addEventListener('click', () => {
-            codeReader.reset()
-            document.getElementById('result').textContent = '';
-            console.log('Reset.')
-          })
 
         })
         .catch((err) => {
